@@ -1,7 +1,5 @@
-# AprilTags Example
-#
-# This example shows the power of the OpenMV Cam to detect April Tags
-# on the OpenMV Cam M7. The M4 versions cannot detect April Tags.
+# AprilTags Application via OpenMV Cam M7
+
 
 import sensor, image, time, math, pyb
 from pyb import LED, Timer, Pin
@@ -43,7 +41,6 @@ def status(state, found):
         p7.pulse_width_percent(0)
         ledMapping(3)
 
-
 #turn on leds based on status
 def ledMapping(pattern):
     if(pattern == 0):    #turned off state
@@ -63,7 +60,6 @@ def ledMapping(pattern):
         green_led.off()
         blue_led.on()
 
-
 #tag id's
 def tag_id(tag):
     if(tag.id() == 0):
@@ -74,9 +70,7 @@ def tag_id(tag):
         return 2
     else:
         return 3
-
-
-
+    
 while(True):
 
     clock.tick()
