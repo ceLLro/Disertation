@@ -1,89 +1,251 @@
-# AprilTags Application via OpenMV Cam M7
-
-
-import sensor, image, time, math, pyb
+import sensor, image, time, math, pyb, _thread
 from pyb import LED, Timer, Pin
-
+import utime
+import _thread
 sensor.reset()
 sensor.set_pixformat(sensor.RGB565)
-sensor.set_framesize(sensor.QQVGA) # we run out of memory if the resolution is much bigger...
+sensor.set_framesize(sensor.QQVGA)
 sensor.skip_frames(time = 2000)
-sensor.set_auto_gain(False)  # must turn this off to prevent image washout...
-sensor.set_auto_whitebal(False)  # must turn this off to prevent image washout...
+sensor.set_auto_gain(False)
+sensor.set_auto_whitebal(False)
 clock = time.clock()
-
-#pin layout
-tim = pyb.Timer(4, freq=1000)
-p0 = pyb.Pin(pyb.Pin.board.P0, pyb.Pin.OUT_PP)
-p7 = tim.channel(1, pyb.Timer.PWM, pin=pyb.Pin("P7"))
-
-#led layout
+tim = pyb.Timer(4, freq=100)
+pwrleft = pyb.Pin(pyb.Pin.board.P5, pyb.Pin.OUT_PP)
+pwrright = pyb.Pin(pyb.Pin.board.P6, pyb.Pin.OUT_PP)
+motorPower =  tim.channel(1, pyb.Timer.PWM, pin=pyb.Pin('P7'))
+fwdleft = pyb.Pin(pyb.Pin.board.P1, pyb.Pin.OUT_PP)
+bwdleft = pyb.Pin(pyb.Pin.board.P2, pyb.Pin.OUT_PP)
+fwdright = pyb.Pin(pyb.Pin.board.P3, pyb.Pin.OUT_PP)
+bwdright = pyb.Pin(pyb.Pin.board.P4, pyb.Pin.OUT_PP)
 red_led   = LED(1)
 green_led = LED(2)
 blue_led  = LED(3)
-
-#control car actions
+red_led.off()
+green_led.off()
+blue_led.off()
+def randColor():
+	for i in range (1,3):
+		ledMapping(i)
+def forward():
+		pwrleft.value(1)
+		pwrright.value(1)
+		fwdleft.value(1)
+		bwdleft.value(0)
+		fwdright.value(1)
+		bwdright.value(0)
+		utime.sleep_ms(800)
+		stop()
+def backward():
+		pwrleft.value(1)
+		pwrright.value(1)
+		fwdleft.value(0)
+		bwdleft.value(1)
+		fwdright.value(0)
+		bwdright.value(1)
+		utime.sleep_ms(800)
+		stop()
+def stop():
+		pwrleft.value(0)
+		pwrright.value(0)
+		fwdleft.value(1)
+		bwdleft.value(1)
+		fwdright.value(1)
+		bwdright.value(1)
+def rotate90():
+		pwrleft.value(1)
+		pwrright.value(1)
+		fwdleft.value(1)
+		bwdleft.value(0)
+		fwdright.value(0)
+		bwdright.value(1)
+		utime.sleep_ms(300)
+		stop()
+def rotate180():
+		pwrleft.value(1)
+		pwrright.value(1)
+		fwdleft.value(1)
+		bwdleft.value(0)
+		fwdright.value(0)
+		bwdright.value(1)
+		utime.sleep_ms(700)
+		stop()
+def rotateLeft():
+		pwrleft.value(1)
+		pwrright.value(1)
+		fwdleft.value(0)
+		bwdleft.value(1)
+		fwdright.value(1)
+		bwdright.value(0)
+		utime.sleep_ms(300)
+		stop()
+def rotateRight():
+		pwrleft.value(1)
+		pwrright.value(1)
+		fwdleft.value(1)
+		bwdleft.value(0)
+		fwdright.value(0)
+		bwdright.value(1)
+		utime.sleep_ms(300)
+		stop()
+def dance():
+	forward()
+	randColor()
+	backward()
+	randColor()
+	randColor()
+	rotate90()
+	randColor()
+	rotate90()
+	randColor()
+	backward()
+	randColor()
+	rotate90()
+	randColor()
+	rotate90()
+	randColor()
+	forward()
+	randColor()
+	rotateRight()
+	randColor()
+	rotateLeft()
+	rotateRight()
+	rotateLeft()
+	rotateRight()
+	rotate180()
+	forward()
+	randColor()
+	backward()
+	randColor()
+	randColor()
+	rotate90()
+	randColor()
+	rotate90()
+	randColor()
+	backward()
+	randColor()
+	rotate90()
+	randColor()
+	rotate90()
+	randColor()
+	forward()
+	randColor()
+	rotateRight()
+	randColor()
+	rotateLeft()
+	rotateRight()
+	rotateLeft()
+	rotateRight()
+	rotate180()
+	forward()
+	randColor()
+	backward()
+	randColor()
+	randColor()
+	rotate90()
+	randColor()
+	rotate90()
+	r  andColor()
+	backward()
+	randColor()
+	rotate90()
+	randColor()
+	rotate90()
+	randColor()
+	forward()
+	randColor()
+	rotateRight()
+	randColor()
+	rotateLeft()
+	rotateRight()
+	rotateLeft()
+	rotateRight()
+	rotate180()
+	stop()
 def status(state, found):
-    if(state == None or found == None):
-        p0.value(0)
-        p7.pulse_width_percent(0)
-        ledMapping(0)
-    elif(state == 1):
-        p0.value(0)
-        p7.pulse_width_percent(65)
-        ledMapping(1)
-    elif(state == 2):
-        p0.value(1)
-        p7.pulse_width_percent(30)
-        ledMapping(2)
-    elif(state == 3):
-        p0.value(0)
-        p7.pulse_width_percent(0)
-        ledMapping(3)
-
-#turn on leds based on status
+	if(state == None or found == None):
+		ledMapping(3)
+		stop()
+	if(state == 1):
+		forward()
+		ledMapping(2)
+	if(state == 2):
+		ledMapping(2)
+		backward()
+	if(state == 3):
+		ledMapping(3)
+		stop()
+	if(state == 4):
+		ledMapping(2)
+		forward()
+		rotateLeft()
+		forward()
+	if(state == 8):
+		ledMapping(2)
+		forward()
+		rotateRight()
+		forward()
+	if(state == 7):
+		dance()
+	if(state == 9):
+		ledMapping(2)
+		backward()
+		rotateRight()
+		backward()
+	if(state == 10):
+		ledMapping(2)
+		backward()
+		rotateLeft()
+		backward()
 def ledMapping(pattern):
-    if(pattern == 0):    #turned off state
-        red_led.off()
-        green_led.off()
-        blue_led.off()
-    elif(pattern == 1):  #forward state
-        red_led.off()
-        green_led.on()
-        blue_led.off()
-    elif(pattern == 2):  #backward state
-        red_led.on()
-        green_led.off()
-        blue_led.off()
-    elif(pattern == 3):  #stop state
-        red_led.off()
-        green_led.off()
-        blue_led.on()
-
-#tag id's
+	if(pattern == 0):
+		red_led.off()
+		green_led.off()
+		blue_led.off()
+	if(pattern == 1):
+		red_led.off()
+		green_led.on()
+		blue_led.off()
+	if(pattern == 2):
+		red_led.on()
+		green_led.off()
+		blue_led.off()
+	if(pattern == 3):
+		red_led.off()
+		green_led.off()
+		blue_led.on()
 def tag_id(tag):
-    if(tag.id() == 0):
-        return 0
-    elif(tag.id() == 1):
-        return 1
-    elif(tag.id() == 2):
-        return 2
-    else:
-        return 3
-    
+	if(tag.id() != 0):
+		return tag.id()
+	else:
+		return 0
+vals = []
+sumRange = 0
+stop()
 while(True):
-
-    clock.tick()
-    id_tag = 3
-    isValid = False
-
-    img = sensor.snapshot()
-    for tag in img.find_apriltags(): # defaults to TAG36H11 without "families".
-
-        img.draw_rectangle(tag.rect(), color = (255, 0, 0))
-        img.draw_cross(tag.cx(), tag.cy(), color = (0, 255, 0))
-        isValid = True
-        id_tag = tag.id()
-
-    status(id_tag, isValid)
-    print(clock.fps())
+	ledMapping(1)
+	clock.tick()
+	id_tag = 0
+	isValid = False
+	img = sensor.snapshot()
+	for tag in img.find_apriltags():
+		img.draw_rectangle(tag.rect(), color = (255, 0, 0))
+		img.draw_cross(tag.cx(), tag.cy(), color = (0, 255, 0))
+		isValid = True
+		id_tag = tag.id()
+	print(id_tag)
+	vals.append(id_tag)
+	print(len(vals))
+	if len(vals) == 30:
+		for i in range(0,30):
+			sumRange = sumRange + vals[i]
+		if sumRange == 0:
+			ledMapping(3)
+			print("sleep")
+			rotate90()
+		for i in range(0,30):
+			vals.pop()
+			stop()
+			sumRange = 0
+	print(vals)
+	status(id_tag, isValid)
+	print(clock.fps(), id_tag)
